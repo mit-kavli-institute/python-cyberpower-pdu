@@ -1,0 +1,6 @@
+# Ignore Python caches
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
