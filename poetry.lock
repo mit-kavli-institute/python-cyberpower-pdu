@@ -583,6 +583,25 @@ tomli = ">=1.2.2"
 poetry-plugin = ["poetry (>=1.0,<2.0)"]
 
 [[package]]
+name = "puresnmp"
+version = "2.0.1"
+description = "Pure Python SNMP implementation"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "puresnmp-2.0.1-py3-none-any.whl", hash = "sha256:9d6413531d33225900883df8ac3131ddac34f13eae6ac6a6ffeee7ae81d309b1"},
+    {file = "puresnmp-2.0.1.tar.gz", hash = "sha256:08a147249a6ff92d3f463b77e21b9221ca7a836ff7401e0b8dfe47135ed4cf56"},
+]
+
+[package.dependencies]
+x690 = ">=1.0,<2.0"
+
+[package.extras]
+crypto = ["puresnmp-crypto (>=1.0.1)"]
+dev = ["asyncmock", "black (>=20.8b1)", "fabric (>=2.6.0)", "furo", "mypy", "pylint", "pytest", "pytest-asyncio", "pytest-cov", "pytest-dependency", "sphinx", "types-dataclasses"]
+readthedocs = ["fabric"]
+
+[[package]]
 name = "pyasn1"
 version = "0.6.1"
 description = "Pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208)"
@@ -795,6 +814,17 @@ files = [
 ]
 
 [[package]]
+name = "t61codec"
+version = "1.0.1"
+description = "Python Character Mapping Codec for T61"
+optional = false
+python-versions = "*"
+files = [
+    {file = "t61codec-1.0.1-py2.py3-none-any.whl", hash = "sha256:4dae780d65086a10ff822b14ecebb762defe478645a248b74980ced87c85f723"},
+    {file = "t61codec-1.0.1.tar.gz", hash = "sha256:4d854f40017ef39e699291a57a9891c74630facb370b94238284eb9a475ae23f"},
+]
+
+[[package]]
 name = "telnetlib3"
 version = "2.0.4"
 description = "Python 3 asyncio Telnet server and client Protocol library"
@@ -844,7 +874,25 @@ h2 = ["h2 (>=4,<5)"]
 socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
+[[package]]
+name = "x690"
+version = "1.0.0.post1"
+description = "Pure Python X.690 implementation"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "x690-1.0.0.post1-py3-none-any.whl", hash = "sha256:de754c27c9a46e6ede08036a804478ecd79591ecbe92df6f97b34adee55e9d64"},
+    {file = "x690-1.0.0.post1.tar.gz", hash = "sha256:3a2a8a4e479079188aa6e847814981286b8f1c19569898fa3fe573ee0ce05349"},
+]
+
+[package.dependencies]
+t61codec = ">=1.0.1,<2.0"
+
+[package.extras]
+dev = ["Pygments", "mypy", "sphinx", "sphinx-rtd-theme", "types-dataclasses", "vulture"]
+test = ["pytest", "pytest-coverage"]
+
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12, <3.13"
-content-hash = "e587b907f55c2a5469358d8ad1db7e61527740ff0b17ad33a801fd29652c07b0"
+content-hash = "628ec0c16d80469f9f2ef8b8ad6103695ef99577de14eac89f5dd0e85c063b95"

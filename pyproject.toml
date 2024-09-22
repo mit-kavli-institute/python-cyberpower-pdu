@@ -11,7 +11,7 @@ python = ">=3.12, <3.13"
 pysnmp-lextudio = "5.0.34"
 telnetlib3 = "^2.0.4"
 pyside6 = "^6.7.2"
-
+puresnmp = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
