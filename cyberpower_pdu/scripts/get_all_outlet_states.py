@@ -8,7 +8,7 @@ IP_ADDRESS = "192.168.1.132"
 
 
 async def main() -> None:
-    pdu = CyberPowerPDU(ip_address=IP_ADDRESS, simulated=False)
+    pdu = CyberPowerPDU(ip_address=IP_ADDRESS, simulate=False)
 
     try:
         await pdu.initialize()

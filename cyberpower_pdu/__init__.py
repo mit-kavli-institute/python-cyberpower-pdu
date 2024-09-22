@@ -41,10 +41,14 @@ class CyberPowerPDU:
     interface for both a simulation and hardware implementation.
     """
 
-    def __init__(self, ip_address: str, port: int = 161, simulated: bool = False) -> None:
+    def __init__(self, ip_address: str, port: int = 161, simulate: bool = False) -> None:
+        """Initializes the `CyberPowerPDU` object. If `simulate` is `True`, then the hardware is
+        not connected to and is instead simulated.
+        """
+        # Note: Port 161 is the default SNMP port
         self.__session: CyberPowerPDU
 
-        if simulated:
+        if simulate:
             self.__session = CyberPowerPDUSimulation()
         else:
             self.__session = CyberPowerPDUHardware(ip_address=ip_address, port=port)

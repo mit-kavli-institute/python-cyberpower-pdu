@@ -123,7 +123,7 @@ class MainWindow(QWidget):  # type: ignore[misc]
         ip_address = self.__ip_address.text()
         self.__label.setText("Trying IP address: " + str(ip_address))
 
-        self.__pdu = CyberPowerPDU(ip_address=ip_address, simulated=SIMULATE_HARDWARE)
+        self.__pdu = CyberPowerPDU(ip_address=ip_address, simulate=SIMULATE_HARDWARE)
 
         try:
             await self.__pdu.initialize()

@@ -12,7 +12,7 @@ COMMAND = OutletCommand.IMMEDIATE_OFF
 
 
 async def main() -> None:
-    pdu = CyberPowerPDU(ip_address=IP_ADDRESS, simulated=False)
+    pdu = CyberPowerPDU(ip_address=IP_ADDRESS, simulate=False)
 
     try:
         await pdu.initialize()
