@@ -52,13 +52,15 @@ exclude = [".*/?\\.venv/.*", "/site-packages/"]
 strict = true
 follow_imports = "silent"
 
+# Note: There are no tests at the moment, but Pytest is left installed as a development
+# dependency.
 [tool.poe.tasks]
-all = ["format", "typecheck", "test"]
+all = ["format", "typecheck"]                                 # ["format", "typecheck", "test"]
 check-imports = "isort . --check"
 check-code-formatting = "black . --check"
 check-formatting = ["check-code-formatting", "check-imports"]
 format-imports = "isort ."
 format-code = "black ."
 format = ["format-code", "format-imports"]
-test = "pytest"
+# test = "pytest"
 typecheck = "mypy --package cyberpower_pdu --no-site-packages --enable-incomplete-feature=NewGenericSyntax"
