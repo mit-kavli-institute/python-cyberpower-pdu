@@ -3,10 +3,12 @@ the state machine that is implemented here using Qt's State Machine framework.
 """
 
 # Core dependencies
+import asyncio
 import sys
 from typing import Callable, no_type_check
 
 # Package dependencies
+import PySide6.QtAsyncio as QtAsyncio  # type: ignore[import-not-found]
 from PySide6.QtCore import (  # type: ignore[import-not-found]
     Qt,
     QTimer,
@@ -21,18 +23,22 @@ from PySide6.QtWidgets import (  # type: ignore[import-not-found]
     QHBoxLayout,
     QLabel,
     QLayout,
+    QMainWindow,
     QPushButton,
     QVBoxLayout,
     QWidget,
 )
 
 # Project dependencies
-from cyberpower_pdu.sync_api import CyberPowerPDUHardware, CyberPowerPDUSimulation, OutletCommand
+from cyberpower_pdu import CyberPowerPDU, OutletCommand
 from cyberpower_pdu.widgets.ip_address_line_edit import IPAddressLineEdit
 from cyberpower_pdu.widgets.led_indicator import LedIndicator
 
 
-class OutletControl(QWidget):  # type: ignore[misc]
+SIMULATE_HARDWARE = True
+
+
+class OutletControl(QMainWindow):  # type: ignore[misc]
     """Provides a custom widget that is a vertical stack of an LED indicator, an on button, and an
     off button, stacked top to bottom.
     """
@@ -106,13 +112,11 @@ class MainWindow(QWidget):  # type: ignore[misc]
         super().__init__()
         self.__number_of_outlets = 0
 
-        self.__pdu: CyberPowerPDUHardware | CyberPowerPDUSimulation
-
-        self.initialize()
+        self.__pdu: CyberPowerPDU
 
     @Slot()
     @no_type_check
-    def try_ip_address(self) -> None:
+    async def try_ip_address(self) -> None:
         """Try the entered IP address. It is a valid IP but may not actually connect to
         a CyberPower PDU.
         """
@@ -120,14 +124,10 @@ class MainWindow(QWidget):  # type: ignore[misc]
         ip_address = self.__ip_address.text()
         self.__label.setText("Trying IP address: " + str(ip_address))
 
-        # pylint: disable=using-constant-test
-        if True:
-            self.__pdu = CyberPowerPDUHardware(ip_address)
-        else:
-            self.__pdu = CyberPowerPDUSimulation()
+        self.__pdu = CyberPowerPDU(ip_address=ip_address, simulate=SIMULATE_HARDWARE)
 
         try:
-            self.__pdu.initialize()
+            await self.__pdu.initialize()
             self.__number_of_outlets = self.__pdu.number_of_outlets
 
             # We index here because we create a total of 16 outlet controls, but the PDU may
@@ -145,7 +145,7 @@ class MainWindow(QWidget):  # type: ignore[misc]
 
     @Slot()
     @no_type_check
-    def get_outlet_statuses(self) -> None:
+    async def get_outlet_statuses(self) -> None:
         """Retrieves the status of all outlets by setting the outlet controls' LED indicators
         directly. This can take up to 1.2 seconds or so, so use it carefully since it could
         potentially lock up the GUI or thread that it is running on.
@@ -156,11 +156,11 @@ class MainWindow(QWidget):  # type: ignore[misc]
 
         for index in range(0, self.__number_of_outlets):
             outlet_control = self.__outlet_controls[index]
-            outlet_control.checked = self.__pdu.get_outlet_state(outlet_control.outlet)
+            outlet_control.checked = await self.__pdu.get_outlet_state(outlet_control.outlet)
 
     @Slot(OutletControl)
     @no_type_check
-    def send_outlet_command(self, outlet_control: OutletControl, state: bool) -> None:
+    async def send_outlet_command(self, outlet_control: OutletControl, state: bool) -> None:
         """Forward on the command to the outlet control's underlying outlet on the PDU"""
 
         if state:
@@ -168,7 +168,7 @@ class MainWindow(QWidget):  # type: ignore[misc]
         else:
             command = OutletCommand.IMMEDIATE_OFF
 
-        self.__pdu.send_outlet_command(outlet_control.outlet, command)
+        await self.__pdu.send_outlet_command(outlet_control.outlet, command)
 
         # Since it takes a long time (approximately 1.2 seconds) to query the state of up to
         # 16 outlets, we simply fire off two state checks for the outlet that was commanded.
@@ -179,22 +179,28 @@ class MainWindow(QWidget):  # type: ignore[misc]
         # of this GUI, but this is currently not handled in this GUI implementation.
 
         QTimer.singleShot(
-            500, lambda outlet_control=outlet_control: self.get_outlet_status(outlet_control)
+            500,
+            lambda outlet_control=outlet_control: asyncio.ensure_future(
+                self.get_outlet_status(outlet_control)
+            ),
         )
         QTimer.singleShot(
-            1000, lambda outlet_control=outlet_control: self.get_outlet_status(outlet_control)
+            1000,
+            lambda outlet_control=outlet_control: asyncio.ensure_future(
+                self.get_outlet_status(outlet_control)
+            ),
         )
 
     @Slot(OutletControl)
     @no_type_check
-    def get_outlet_status(self, outlet_control: OutletControl) -> None:
+    async def get_outlet_status(self, outlet_control: OutletControl) -> None:
         """Retrieve the state of the outlet assigned to the outlet control and set the outlet
         control's checked property
         """
 
-        outlet_control.checked = self.__pdu.get_outlet_state(outlet_control.outlet)
+        outlet_control.checked = await self.__pdu.get_outlet_state(outlet_control.outlet)
 
-    def initialize(self) -> None:  # pylint: disable=too-many-statements
+    async def initialize(self) -> None:  # pylint: disable=too-many-statements
         """Initialize the GUI widgets and state machine"""
 
         self.setWindowTitle("CyberPower PDU outlet controller")
@@ -251,8 +257,8 @@ class MainWindow(QWidget):  # type: ignore[misc]
             self.signal_failed_to_connect_to_ip_address, state_waiting_for_ip_address
         )
 
-        state_connecting.entered.connect(self.try_ip_address)
-        state_connected.entered.connect(self.get_outlet_statuses)
+        state_connecting.entered.connect(lambda: asyncio.ensure_future(self.try_ip_address()))
+        state_connected.entered.connect(lambda: asyncio.ensure_future(self.get_outlet_statuses()))
 
         state_waiting_for_ip_address.assignProperty(ip_address, "enabled", True)
         state_waiting_for_ip_address.assignProperty(is_connected_indicator, "checked", False)
@@ -277,14 +283,14 @@ class MainWindow(QWidget):  # type: ignore[misc]
             # It is possible that this is solvable, but for right now, we ignore the MyPy check
 
             outlet_control.on_button_clicked[bool].connect(
-                lambda state, outlet_control=outlet_control: self.send_outlet_command(
-                    outlet_control, True
+                lambda state, outlet_control=outlet_control: asyncio.ensure_future(
+                    self.send_outlet_command(outlet_control, True)
                 )
             )
 
             outlet_control.off_button_clicked[bool].connect(
-                lambda state, outlet_control=outlet_control: self.send_outlet_command(
-                    outlet_control, False
+                lambda state, outlet_control=outlet_control: asyncio.ensure_future(
+                    self.send_outlet_command(outlet_control, False)
                 )
             )
 
@@ -305,7 +311,11 @@ class MainWindow(QWidget):  # type: ignore[misc]
         self.show()
 
 
-if __name__ == "__main__":
+async def main() -> None:
     application = QApplication(sys.argv)
     window = MainWindow()
-    sys.exit(application.exec())
+    await window.initialize()
+
+
+if __name__ == "__main__":
+    QtAsyncio.run(main())
