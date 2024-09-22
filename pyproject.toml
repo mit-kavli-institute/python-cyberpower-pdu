@@ -7,7 +7,7 @@ license = "MIT License"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.12, <3.13"
+python = ">=3.10, <3.13"
 telnetlib3 = "^2.0.4"
 pyside6 = "^6.7.2"
 puresnmp = "^2.0.1"
