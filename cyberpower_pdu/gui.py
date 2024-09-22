@@ -34,6 +34,7 @@ from cyberpower_pdu import CyberPowerPDU, OutletCommand
 from cyberpower_pdu.widgets.ip_address_line_edit import IPAddressLineEdit
 from cyberpower_pdu.widgets.led_indicator import LedIndicator
 
+
 SIMULATE_HARDWARE = True
 
 

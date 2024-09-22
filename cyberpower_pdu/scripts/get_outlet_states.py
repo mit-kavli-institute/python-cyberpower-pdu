@@ -5,6 +5,7 @@ import time
 # Project dependencies
 from cyberpower_pdu import CyberPowerPDU
 
+
 IP_ADDRESS = "192.168.1.132"
 
 
