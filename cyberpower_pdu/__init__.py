@@ -111,9 +111,7 @@ class CyberPowerPDUSimulation(CyberPowerPDU):
     @override
     async def initialize(self) -> None:
         self.__number_of_outlets = 16
-
-        for index in range(self.__number_of_outlets):
-            self.__outlet_states[index] = False
+        self.__outlet_states = [False] * self.__number_of_outlets
 
     @override
     async def close(self) -> None:
