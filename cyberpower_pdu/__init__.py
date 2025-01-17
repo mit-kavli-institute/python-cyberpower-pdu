@@ -12,7 +12,7 @@ from puresnmp import V2C, Client, PyWrapper  # type: ignore[import-not-found]
 from puresnmp.types import Integer  # type: ignore[import-not-found]
 
 
-logger = logging.getLogger("CyberPowrePDU")
+logger = logging.getLogger("CyberPowerPDU")
 
 
 ############################################################
