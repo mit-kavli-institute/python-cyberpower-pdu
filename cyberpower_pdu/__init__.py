@@ -116,11 +116,11 @@ class CyberPowerPDUSimulation(CyberPowerPDU):
     async def initialize(self) -> None:
         self.__number_of_outlets = 16
         self.__outlet_states = [False] * self.__number_of_outlets
-        logger.debug("Simulated initialization complete")
+        logger.info("Simulated initialization complete")
 
     @override
     async def close(self) -> None:
-        logger.debug("Simulated connection closed")
+        logger.info("Simulated connection closed")
         pass
 
     @override
@@ -135,15 +135,15 @@ class CyberPowerPDUSimulation(CyberPowerPDU):
     async def send_outlet_command(self, outlet: int, command: OutletCommand) -> None:
         match command:
             case OutletCommand.IMMEDIATE_ON:
-                logger.debug(f"Simulated outlet {outlet} turned on")
+                logger.info(f"Simulated outlet {outlet} turned on")
                 self.__outlet_states[outlet - 1] = True
 
             case OutletCommand.IMMEDIATE_OFF:
-                logger.debug(f"Simulated outlet {outlet} turned off")
+                logger.info(f"Simulated outlet {outlet} turned off")
                 self.__outlet_states[outlet - 1] = False
 
             case OutletCommand.IMMEDIATE_REBOOT:
-                logger.debug(f"Simulated outlet {outlet} rebooted")
+                logger.info(f"Simulated outlet {outlet} rebooted")
                 self.__outlet_states[outlet - 1] = True
 
 
