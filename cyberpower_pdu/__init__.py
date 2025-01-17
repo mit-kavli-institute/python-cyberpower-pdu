@@ -4,11 +4,15 @@ a user to control outlets and banks and request information from the PDU.
 
 # Core dependencies
 from enum import Enum
+import logging
 from typing import override
 
 # Package dependencies
 from puresnmp import V2C, Client, PyWrapper  # type: ignore[import-not-found]
 from puresnmp.types import Integer  # type: ignore[import-not-found]
+
+
+logger = logging.getLogger("CyberPowrePDU")
 
 
 ############################################################
@@ -112,9 +116,11 @@ class CyberPowerPDUSimulation(CyberPowerPDU):
     async def initialize(self) -> None:
         self.__number_of_outlets = 16
         self.__outlet_states = [False] * self.__number_of_outlets
+        logger.debug("Simulated initialization complete")
 
     @override
     async def close(self) -> None:
+        logger.debug("Simulated connection closed")
         pass
 
     @override
@@ -129,12 +135,15 @@ class CyberPowerPDUSimulation(CyberPowerPDU):
     async def send_outlet_command(self, outlet: int, command: OutletCommand) -> None:
         match command:
             case OutletCommand.IMMEDIATE_ON:
+                logger.debug(f"Simulated outlet {outlet} turned on")
                 self.__outlet_states[outlet - 1] = True
 
             case OutletCommand.IMMEDIATE_OFF:
+                logger.debug(f"Simulated outlet {outlet} turned off")
                 self.__outlet_states[outlet - 1] = False
 
             case OutletCommand.IMMEDIATE_REBOOT:
+                logger.debug(f"Simulated outlet {outlet} rebooted")
                 self.__outlet_states[outlet - 1] = True
 
 
@@ -186,11 +195,12 @@ class CyberPowerPDUHardware(CyberPowerPDU):
         # Grab the number of banks and outlets so that when these are passed in as indices, they
         # can be checked if they are within range or not
         self.__number_of_outlets = await self.__get_number_of_outlets()
+        logger.debug(f"Successfully connected to {self.__number_of_outlets} outlets")
 
     @override
     async def close(self) -> None:
         # There is no close needed for SNMP. This override is here to be explicit.
-        pass
+        logger.debug("Closing connection")
 
     @override
     async def get_all_outlet_states(self) -> list[bool]:
@@ -217,6 +227,7 @@ class CyberPowerPDUHardware(CyberPowerPDU):
     @override
     async def send_outlet_command(self, outlet: int, command: OutletCommand) -> None:
         if self.__valid_outlet_index(outlet):
+            logger.debug(f"Sending {command.name.lower()} to outlet {outlet}")
             # This OID corresponds to ePDUOutletControlOutletCommand in the CyberPower_MIB_v2.11.mib file
             oid = f".1.3.6.1.4.1.3808.1.1.3.3.3.1.1.4.{outlet}"
             await self.__client.set(oid=oid, value=Integer(command.value))
