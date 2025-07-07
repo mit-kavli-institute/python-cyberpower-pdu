@@ -2,12 +2,12 @@
 name = "cyberpower-pdu"
 version = "0.1.0"
 description = "Python API for interacting with a CyberPower PDU over the network"
-authors = ["Blake Mitchell <bmitc@mit.edu>"]
+authors = ["Blake Mitchell <bmitc@mit.edu>", "Jack Haviland <haviland@mit.edu>"]
 license = "MIT License"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.13"
+python = ">=3.10, <3.14"
 puresnmp = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
