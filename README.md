@@ -25,8 +25,8 @@ poetry run python ./cyberpower-pdu/gui.py`
 stateDiagram-v2
     [*] --> waiting_for_ip_address
     waiting_for_ip_address --> connecting: valid IP entered
-    connecting --> waiting_for_ip_address: failed to connect\nto IP address
-    connecting --> waiting_for_ip_address: IP address\nchanged
-    connecting --> connected: connected to PDU\nat IP address
+    connecting --> waiting_for_ip_address: failed to connect<br>to IP address
+    connecting --> waiting_for_ip_address: IP address<br>changed
+    connecting --> connected: connected to PDU<br>at IP address
     connected --> waiting_for_ip_address: IP address changed
 ```
